@@ -29,7 +29,10 @@ Or if you prefer you can also run it through docker or docker compose.
 
  #### Run it through Docker
 
- - Available in [Dockerhub](https://hub.docker.com/r/erev0s/vampi)
 ~~~~
 docker-compose up -d
 ~~~~
+
+### Project Structure 
+
+https://auth0.com/blog/best-practices-for-flask-api-development/
