@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, Forbidden, Conflict, Unauthorized, BadRequest
 from api.errors.errors import *
 
 app = Flask(__name__)
@@ -27,9 +27,12 @@ db = client[MONGO_DB]
 
 users_collection = db["users"]
 
-#Register error handler functions for HTTP errors
+#Register error handling functions for HTTP errors
+app.register_error_handler(409, handle_conflict_error)
 app.register_error_handler(404, handle_not_found_error)
-
+app.register_error_handler(403, handle_forbidden_error)
+app.register_error_handler(401, handle_unauthorized_error)
+app.register_error_handler(400, handle_bad_request_error)
 
 @app.route("/")
 def home():
@@ -38,13 +41,13 @@ def home():
 @app.route("/api/v1/users", methods=["POST"])
 def register():
 	new_user = request.get_json() # store the json body request
-	new_user["password"] = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest() # encrpt passwords
-	doc = users_collection.find_one({"username": new_user["username"]}) # check if user exist
+	new_user["password"] = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest() # encript passwords
+	doc = users_collection.find_one({"username": new_user["username"]}) # check if user exists
 	if not doc:
 		users_collection.insert_one(new_user)
 		return jsonify({'msg': 'User created successfully'}), 201
 	else:
-		return jsonify({'msg': 'Username already exists'}), 409
+		raise Conflict('Username already exists')  # Raise a Conflict (409) exception
 
 @app.route("/api/v1/login", methods=["POST"])
 def login():
@@ -57,7 +60,7 @@ def login():
 			access_token = create_access_token(identity=user_from_db['username']) # create jwt token
 			return jsonify(access_token=access_token), 200
 
-	return jsonify({'msg': 'The username or password is incorrect'}), 401
+	return Unauthorized('The username or password is incorrect')  # Raise a Unauthorized (401) exception
 
 @app.route("/api/v1/user", methods=["GET"])
 @jwt_required
@@ -68,7 +71,7 @@ def profile():
 		del user_from_db['_id'], user_from_db['password'] # delete data we don't want to return
 		return jsonify({'profile' : user_from_db }), 200
 	else:
-		return jsonify({'msg': 'Profile not found'}), 404
+		raise NotFound('Profile not found')
 
 @app.route("/api/v1/user/<username>", methods=["DELETE"]) #Deletes a user
 @jwt_required
@@ -76,12 +79,12 @@ def delete_user(username):
     current_user = get_jwt_identity()
     user_from_db = users_collection.find_one({'username': current_user})
     if not user_from_db or user_from_db['role'] != 'admin':
-        return jsonify({'msg': 'You are not authorized to perform this action'}), 403
+        raise Forbidden('You are not authorized to perform this action')  # Raise a Forbidden (403) exception
     else:
         try:
             user_to_delete = users_collection.find_one({"username": username}) # Check if user to be deleted is in the database
             if not user_to_delete:
-                raise NotFound('User not found')  # Raise a NotFound exception
+                raise NotFound('User not found')  # Raise a NotFound (404) exception
             users_collection.delete_one({"username": username})
             return jsonify({'msg': 'User successfully deleted!'}), 200
         except NotFound as e:
@@ -94,16 +97,16 @@ def update_password(username):
     if current_user != username: # If the user trying to change the password is not themselves, they must have admin privileges
         user_from_db = users_collection.find_one({'username': current_user})
         if not user_from_db or user_from_db['role'] != 'admin':
-            return jsonify({'msg': 'You are not authorized to perform this action'}), 401
+            raise Forbidden('You are not authorized to perform this action')  # Raise a Forbidden (403) exception
 
     update_data = request.get_json()
     new_password = update_data.get('password') # Get new password data from the request
     if not new_password:
-        return jsonify({'msg': 'New password required'}), 400
+        raise BadRequest('New password required')  # Raise a BadRequest (400) exception
 
     user_to_update = users_collection.find_one({"username": username}) # Find user in database
     if not user_to_update:
-        return jsonify({'msg': 'User not found'}), 404
+        raise NotFound('User not found')  # Raise a NotFound (404) exception
     users_collection.update_one({"username": username}, {"$set": {"password": hashlib.sha256(new_password.encode("utf-8")).hexdigest()}})
     return jsonify({'msg': 'Password successfully updated!'}), 200
 
