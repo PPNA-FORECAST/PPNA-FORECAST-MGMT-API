@@ -97,15 +97,15 @@ def create_user():
 @app.route("/api/v1/login", methods=["POST"])
 def login():
 	login_details = request.get_json() # store the json body request
-	user_from_db = users_collection.find_one({'username': login_details['username']})  # search for user in database
+	user_from_db = users_collection.find_one({'user_email': login_details['user_email']})  # search for user in database
 
 	if user_from_db:
 		encrpted_password = hashlib.sha256(login_details['password'].encode("utf-8")).hexdigest()
 		if encrpted_password == user_from_db['password']:
-			access_token = create_access_token(identity=user_from_db['username']) # create jwt token
+			access_token = create_access_token(identity=user_from_db['user_email']) # create jwt token
 			return jsonify(access_token=access_token), 200
 
-	return Unauthorized('The username or password is incorrect')  # Raise a Unauthorized (401) exception
+	return Unauthorized('The email or password is incorrect')  # Raise a Unauthorized (401) exception
 
 
 @app.route("/api/v1/user", methods=["GET"])
