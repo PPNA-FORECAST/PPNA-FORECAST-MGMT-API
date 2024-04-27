@@ -1,16 +1,4 @@
 services:
-  web:
-    build: . 
-    command: python -u app.py 
-    ports: 
-      - 5000:5000
-    volumes:
-      - .:/ppnaforecast
-    links:
-      - db
-    depends_on:
-      - db
-
   db: 
     image: mongo:7.0.4
     hostname: mongodb
@@ -20,3 +8,21 @@ services:
       - 27017:27017
     volumes:
       - ./initMongo/init-mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - vnet1
+
+  api:
+    build: . 
+    command: python -u app.py 
+    ports: 
+      - 5000:5000
+    volumes:
+      - .:/ppnaforecast
+    networks:
+      - vnet1
+    depends_on:
+      - db
+
+networks:
+  vnet1:
+    driver: bridge

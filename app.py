@@ -1,21 +1,52 @@
+####### IMPORTS ####### 
+import os
 import hashlib
 import datetime
-from flask import Flask, request, jsonify
+
+#FLASK 
+from flask import Flask, request, jsonify, Flask, redirect, url_for, session
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from requests_oauthlib import OAuth2Session
+
+#MONGO 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
+
+#ERRORS 
 from werkzeug.exceptions import NotFound, Forbidden, Conflict, Unauthorized, BadRequest
 from flask_cors import CORS
 from api.errors.errors import *
+#######################
 
+
+######## APLICATION ###### 
 app = Flask(__name__)
+
 CORS(app, resources={r"/api/*": {"origins": "*"}}) # Allows request from different origins (API and app are not running on the same domain or port)
+
+
+### Security Configuration (put in another place) ###
+
+#JWT
 jwt = JWTManager(app)
 app.config['JWT_SECRET_KEY'] = 'aa2233'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
 
+#OAUTH
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+app.config['SECRET_KEY'] = 'your_secret_key'
+client_id = '1040272532907-0e5c0mgge5t76m6n2srf40p1tqg52brv.apps.googleusercontent.com'
+client_secret = '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'
+authorization_base_url = 'https://accounts.google.com/o/oauth2/auth'
+token_url = 'https://accounts.google.com/o/oauth2/token'
+redirect_uri = 'http://127.0.0.1:5000/api/v1/login/callback'
+scope = ['profile', 'email', 'openid']
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' #para que me deje usarlo sin HTTPS (no produccion)
 
-#database connect
+#DATABASE
 MONGO_HOST = 'mongodb'
 MONGO_PORT = 27017
 MONGO_DB = 'ppna_forecast_db'
@@ -29,13 +60,15 @@ db = client[MONGO_DB]
 
 users_collection = db["users"]
 
-#Register error handling functions for HTTP errors
+#ERRORS
 app.register_error_handler(409, handle_conflict_error)
 app.register_error_handler(404, handle_not_found_error)
 app.register_error_handler(403, handle_forbidden_error)
 app.register_error_handler(401, handle_unauthorized_error)
 app.register_error_handler(400, handle_bad_request_error)
 
+
+#ENDPOINTS
 @app.route("/")
 def home():
 	return "Mensaje de bienvenida de la api"
@@ -93,7 +126,7 @@ def create_user():
 # 	else:
 # 		raise Conflict('Username already exists')  # Raise a Conflict (409) exception
 
-
+"""
 @app.route("/api/v1/login", methods=["POST"])
 def login():
 	login_details = request.get_json() # store the json body request
@@ -106,7 +139,31 @@ def login():
 			return jsonify(access_token=access_token), 200
 
 	return Unauthorized('The email or password is incorrect')  # Raise a Unauthorized (401) exception
+"""
+class User(UserMixin):
+    pass
 
+@login_manager.user_loader
+def load_user(user_id):
+    user = User()
+    user.id = user_id
+    return user
+
+@app.route('/api/v1/login')
+def login():
+    google = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
+    authorization_url, state = google.authorization_url(authorization_base_url, access_type='offline', prompt='select_account')
+    session['oauth_state'] = state
+    #print (state)
+    return redirect(authorization_url)
+
+@app.route('/api/v1/login/callback')
+def callback():
+    google = OAuth2Session(client_id, state=session['oauth_state'], redirect_uri=redirect_uri)
+    token = google.fetch_token(token_url, client_secret=client_secret, authorization_response=request.url)
+    #print(token)
+    session['google_token'] = token
+    return redirect(url_for('.home'))
 
 @app.route("/api/v1/user", methods=["GET"])
 @jwt_required
@@ -119,46 +176,11 @@ def profile():
 	else:
 		raise NotFound('Profile not found')
 
-
-@app.route("/api/v1/user/<username>", methods=["DELETE"]) #Deletes a user
-@jwt_required
-def delete_user(username):
-    current_user = get_jwt_identity()
-    user_from_db = users_collection.find_one({'username': current_user})
-    if not user_from_db or user_from_db['role'] != 'admin':
-        raise Forbidden('You are not authorized to perform this action')  # Raise a Forbidden (403) exception
-    else:
-        try:
-            user_to_delete = users_collection.find_one({"username": username}) # Check if user to be deleted is in the database
-            if not user_to_delete:
-                raise NotFound('User not found')  # Raise a NotFound (404) exception
-            users_collection.delete_one({"username": username})
-            return jsonify({'msg': 'User successfully deleted!'}), 200
-        except NotFound as e:
-            return handle_not_found_error(e)
-        
-
-@app.route("/api/v1/user/<username>/password", methods=["PATCH"]) # Updates user password
-@jwt_required
-def update_password(username):
-    current_user = get_jwt_identity()
-    if current_user != username: # If the user trying to change the password is not themselves, they must have admin privileges
-        user_from_db = users_collection.find_one({'username': current_user})
-        if not user_from_db or user_from_db['role'] != 'admin':
-            raise Forbidden('You are not authorized to perform this action')  # Raise a Forbidden (403) exception
-
-    update_data = request.get_json()
-    new_password = update_data.get('password') # Get new password data from the request
-    if not new_password:
-        raise BadRequest('New password required')  # Raise a BadRequest (400) exception
-
-    user_to_update = users_collection.find_one({"username": username}) # Find user in database
-    if not user_to_update:
-        raise NotFound('User not found')  # Raise a NotFound (404) exception
-    users_collection.update_one({"username": username}, {"$set": {"password": hashlib.sha256(new_password.encode("utf-8")).hexdigest()}})
-    return jsonify({'msg': 'Password successfully updated!'}), 200
-
-
+@app.route('/api/v1/logout')
+@login_required
+def logout():
+    session.pop('google_token', None)
+    return redirect(url_for('.index'))
 
 
 if __name__ == '__main__':
