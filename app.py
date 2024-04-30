@@ -157,13 +157,28 @@ def login():
     #print (state)
     return redirect(authorization_url)
 
+# @app.route('/api/v1/login/callback')
+# def callback():
+#     google = OAuth2Session(client_id, state=session['oauth_state'], redirect_uri=redirect_uri)
+#     token = google.fetch_token(token_url, client_secret=client_secret, authorization_response=request.url)
+#     #print(token)
+#     session['google_token'] = token
+#     return redirect(url_for('.home'))
+
 @app.route('/api/v1/login/callback')
 def callback():
     google = OAuth2Session(client_id, state=session['oauth_state'], redirect_uri=redirect_uri)
-    token = google.fetch_token(token_url, client_secret=client_secret, authorization_response=request.url)
-    #print(token)
-    session['google_token'] = token
-    return redirect(url_for('.home'))
+    #token = google.fetch_token(token_url, client_secret=client_secret, authorization_response=request.url)
+
+    # Obtener datos del usuario autorizado
+    user_info = google.get('https://www.googleapis.com/oauth2/v1/userinfo').json()
+    user_email = user_info['email']
+
+    # Crear un JWT o similar para devolver al frontend
+    access_token = create_access_token(identity=user_email)  # Create JWT
+
+    # Retornar el JWT al frontend
+    return jsonify({'access_token': access_token})  # Retornar el token en formato JSON
 
 @app.route("/api/v1/user", methods=["GET"])
 @jwt_required
