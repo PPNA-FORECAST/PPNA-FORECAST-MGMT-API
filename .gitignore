@@ -42,5 +42,4 @@ nosetests.xml
 venv
 
 # Environment files
-.env
-.env-mysql
+#.env descomentar

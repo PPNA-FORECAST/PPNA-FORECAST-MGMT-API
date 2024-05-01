@@ -1,7 +1,6 @@
 flask
 pymongo
-flask_jwt_extended
+python-dotenv
 flask_cors
-Flask-OAuthlib
-flask_login
-requests_oauthlib
+jsonschema
+flask_jwt_extended
