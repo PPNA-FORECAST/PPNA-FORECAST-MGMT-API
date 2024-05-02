@@ -21,12 +21,16 @@ jwt = JWTManager(app)
 ### Blueprints 
 app.register_blueprint(user_bp)
 
-### Errors 
-app.register_error_handler(409, handle_conflict_error)
-app.register_error_handler(404, handle_not_found_error)
-app.register_error_handler(403, handle_forbidden_error)
+### Errors
+app.register_error_handler(400, handle_bad_request_error) 
 app.register_error_handler(401, handle_unauthorized_error)
-app.register_error_handler(400, handle_bad_request_error)
+app.register_error_handler(403, handle_forbidden_error)
+app.register_error_handler(404, handle_not_found_error)
+app.register_error_handler(409, handle_conflict_error)
+app.register_error_handler(500, handle_internal_server_error)
+
+
+
 
 if __name__ == '__main__':
 
