@@ -27,7 +27,7 @@ app.register_error_handler(401, handle_unauthorized_error)
 app.register_error_handler(403, handle_forbidden_error)
 app.register_error_handler(404, handle_not_found_error)
 app.register_error_handler(409, handle_conflict_error)
-app.register_error_handler(500, handle_internal_server_error)
+app.register_error_handler(500, handle_generic_error)
 
 
 
