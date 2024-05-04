@@ -13,7 +13,7 @@ user_register_schema = {
         },
         "datapoints": {
             "type": "array",
-            "items": {"type": "number"},
+            #"items": {"type": "number"},
             "minItems": 3  # There must be at least 3 datapoints
         }
     },

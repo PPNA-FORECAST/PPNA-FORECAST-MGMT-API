@@ -4,12 +4,13 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from api.route.user_route import user_bp
 from api.errors.errors import *
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
+from flask_cors import CORS
 
 
 app = Flask(__name__)
 
-
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Permitir solicitudes de cualquier origen
 ### Environment variables
 load_dotenv()
 

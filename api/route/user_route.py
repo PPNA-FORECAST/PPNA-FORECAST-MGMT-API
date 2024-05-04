@@ -18,7 +18,7 @@ def create_user():
     try:    
         jsonschema.validate(user_data, user_register_schema)
     except ValidationError as ve:  
-        return handle_bad_request_error(ve)
+        return handle_bad_request_error(ve) # Raises 400 error
     
     try:
         new_user = UserService.create_user(**user_data)
