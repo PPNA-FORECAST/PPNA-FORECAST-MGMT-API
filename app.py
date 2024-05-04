@@ -3,6 +3,7 @@ import datetime
 from flask import Flask 
 from flask_jwt_extended import JWTManager
 from api.route.user_route import user_bp
+from api.route.ppna_route import ppna_bp
 from api.errors.errors import *
 from dotenv import load_dotenv
 from flask_cors import CORS
@@ -21,6 +22,7 @@ jwt = JWTManager(app)
 
 ### Blueprints 
 app.register_blueprint(user_bp)
+app.register_blueprint(ppna_bp)
 
 ### Errors
 app.register_error_handler(400, handle_bad_request_error) 

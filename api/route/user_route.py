@@ -10,7 +10,7 @@ from api.errors.errors import *
 
 user_bp = Blueprint('user', __name__)
 
-@user_bp.route("/api/v1/users/register", methods=["POST"])
+@user_bp.route("/api/v1/user/register", methods=["POST"])
 def create_user():
 
     user_data = request.get_json()
@@ -26,7 +26,7 @@ def create_user():
     except Exception as e:  
         return handle_generic_error(e)
 
-@user_bp.route("/api/v1/users/login", methods=["POST"])
+@user_bp.route("/api/v1/user/login", methods=["POST"])
 def login_user(): 
     user_data = request.get_json()
 
@@ -42,7 +42,7 @@ def login_user():
         return handle_generic_error(e)
     
 
-@user_bp.route("/api/v1/users", methods=["GET"])
+@user_bp.route("/api/v1/user", methods=["GET"])
 @jwt_required()
 def get_user(): 
     current_user = get_jwt_identity() 
@@ -51,3 +51,4 @@ def get_user():
         return jsonify({"email":user['email'], "datapoints":user['datapoints']}), 200
     else:
         raise NotFound("User not found.")
+

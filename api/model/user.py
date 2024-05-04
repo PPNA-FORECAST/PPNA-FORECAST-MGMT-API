@@ -9,17 +9,17 @@ class User:
         self.datapoints = datapoints
 
     def save(self):
-        users_collection = db["users"]
-        existing_user = users_collection.find_one({"email": self.email})
+        user_collection = db["user"]
+        existing_user = user_collection.find_one({"email": self.email})
         if existing_user:
             raise Conflict("User already exists.")
         else:
-            users_collection.insert_one(self.__dict__)
+            user_collection.insert_one(self.__dict__)
 
     @staticmethod
     def find_by_email(email):
-        users_collection = db["users"]
-        return users_collection.find_one({"email": email})
+        user_collection = db["user"]
+        return user_collection.find_one({"email": email})
     
     def __repr__(self):
         return f'{{"username": "{self.username}", "email": "{self.email}"}}'

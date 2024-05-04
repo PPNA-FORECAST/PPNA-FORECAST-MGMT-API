@@ -8,6 +8,7 @@ services:
       - 27017:27017
     volumes:
       - ./initMongo/init-mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./initMongo/ppna.csv:/docker-entrypoint-initdb.d/ppna.csv:ro
     networks:
       - vnet1
 
