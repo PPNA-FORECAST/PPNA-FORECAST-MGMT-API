@@ -11,13 +11,13 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-CORS(app, resources={r"/api/*": {"origins": "*"}})  # Permitir solicitudes de cualquier origen
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow request regardless the origin
 ### Environment variables
 load_dotenv()
 
 ### JWT 
 app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=1) # define the life span of the token
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=1) # Define the lifespan of the token
 jwt = JWTManager(app)
 
 ### Blueprints 
