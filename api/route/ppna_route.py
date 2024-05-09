@@ -24,6 +24,7 @@ def get_ppna_points():
         raise NotFound("User not found.")
     
     geometry = user.get("datapoints")  # User polygon
+    geometry = Ppna.correct_coordinate_order(geometry)
     geometry = Ppna.close_polygon(geometry)
 
     if not geometry:
