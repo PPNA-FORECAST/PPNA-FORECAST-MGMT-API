@@ -4,26 +4,6 @@ from config import db
 
 class Ppna:
 
-    """
-    def __init__(self, email, password, datapoints):
-        self.email = email
-        self.password = password
-        self.datapoints = datapoints
-
-    def save(self):
-        users_collection = db["users"]
-        existing_user = users_collection.find_one({"email": self.email})
-        if existing_user:
-            raise Conflict("User already exists.")
-        else:
-            users_collection.insert_one(self.__dict__)
-    
-    def get_points():
-        ppna_collection = db["ppna"]
-        ppna_point = ppna_collection.count_documents({})
-
-        return ppna_point
-    """
     @staticmethod
     def get_points(polygon_coordinates):
 
@@ -35,25 +15,16 @@ class Ppna:
             "type": "Polygon",
             "coordinates": [polygon_coordinates],
         }
-
-        print("Coordinates:", polygon_coordinates)
-        print("Polygon GEOJson:", polygon_geojson)
-        # all_points = list(ppna_collection.find({}))
-        # print("Todos los puntos:", all_points)  
-        # if len(all_points) == 0:
-        #     print("La colección está vacía.")
-
         # Get points inside polygon
         try:
-        # Obtener puntos dentro del polígono
             points_in_polygon = list(
                 ppna_collection.find(
-                    {"location": {"$geoWithin": {"$geometry": polygon_geojson}}}
+                    {"location": {"$geoWithin": {"$geometry": polygon_geojson}}},
+                    {"_id": 0, "ppna": 1, "temp": 1, "ppt": 1, "date": 1, "latitude": 1, "longitude": 1}
+                )
             )
-        )
-            print("Puntos en el polígono:", points_in_polygon)
             return points_in_polygon
-    
+            
         except OperationFailure as e:
             # Handle specific errors from MongoDB
             print(f"Error de operación: {e}")
@@ -63,11 +34,12 @@ class Ppna:
             print(f"Error inesperado: {e}")
             raise
 
+    # Necesary because GeoJson use a closed polygon
     def close_polygon(points):
         if points[0] != points[-1]: 
             points.append(points[0])  # Adds first coordinate to last to close the polygon
         return points
 
+    # Change coordinate order [latitude, longitude] to [longitude, latitude] (necesary because the frontend use one format and backend the other)
     def correct_coordinate_order(coordinates):
-    # Change coordinate order [latitude, longitude] to [longitude, latitude]
         return [[point[1], point[0]] for point in coordinates]
