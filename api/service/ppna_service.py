@@ -6,7 +6,7 @@ class PpnaService:
     @staticmethod
     def get_points(geometry):	
 
-        geometry = Ppna.correct_coordinate_order(geometry) 
+        #geometry = Ppna.correct_coordinate_order(geometry) 
         geometry = Ppna.close_polygon(geometry)
 
         if not geometry:
@@ -21,4 +21,16 @@ class PpnaService:
             raise NotFound("No Points found in the User Geometry.")
         else:
             return points_in_polygon
+        
+    @staticmethod
+    def get_area(geometry):	
 
+        #geometry = Ppna.correct_coordinate_order(geometry) 
+        geometry = Ppna.close_polygon(geometry)
+
+        if not geometry:
+            raise BadRequest("No se proporcionó la geometría del usuario")
+
+        area = Ppna.get_area(geometry)
+
+        return area

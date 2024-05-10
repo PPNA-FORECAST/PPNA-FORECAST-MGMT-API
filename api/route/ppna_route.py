@@ -23,5 +23,6 @@ def get_ppna_points():
     geometry = user.get("datapoints")  # User polygon
     
     points = PpnaService.get_points(geometry)
-
-    return jsonify({"locations": points}), 200
+    area = PpnaService.get_area(geometry)
+    
+    return jsonify({"locations": points, "area":area}), 200
