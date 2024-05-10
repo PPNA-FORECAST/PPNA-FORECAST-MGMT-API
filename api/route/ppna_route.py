@@ -2,7 +2,7 @@ from api.schema.user_schema import *
 from api.service.user_service import UserService
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from api.model.ppna import Ppna
+from api.service.ppna_service import PpnaService
 from werkzeug.exceptions import NotFound
 from pymongo import MongoClient
 
@@ -22,6 +22,6 @@ def get_ppna_points():
     
     geometry = user.get("datapoints")  # User polygon
     
-    points = Ppna.get_points(geometry)
+    points = PpnaService.get_points(geometry)
 
     return jsonify({"locations": points}), 200

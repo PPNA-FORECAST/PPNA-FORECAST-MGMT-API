@@ -6,7 +6,7 @@ class PpnaService:
     @staticmethod
     def get_points(geometry):	
 
-        #geometry = Ppna.correct_coordinate_order(geometry) # ¿Es necesario? # Comentar para que funcione con curl
+        geometry = Ppna.correct_coordinate_order(geometry) 
         geometry = Ppna.close_polygon(geometry)
 
         if not geometry:
