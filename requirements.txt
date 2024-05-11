@@ -5,3 +5,4 @@ flask_cors
 jsonschema
 flask_jwt_extended
 area
+cryptography

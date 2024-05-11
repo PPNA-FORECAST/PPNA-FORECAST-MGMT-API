@@ -45,7 +45,7 @@ def login_user():
 @user_bp.route("/api/v1/user", methods=["GET"])
 @jwt_required()
 def get_user(): 
-    current_user = get_jwt_identity() 
+    current_user = get_jwt_identity()
     user = UserService.get_user(current_user)
     if user:
         return jsonify({"email":user['email'], "datapoints":user['datapoints']}), 200

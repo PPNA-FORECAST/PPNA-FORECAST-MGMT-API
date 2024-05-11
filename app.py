@@ -16,7 +16,9 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow request regardless t
 load_dotenv()
 
 ### JWT 
-app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['JWT_PRIVATE_KEY'] = open(os.environ.get('PRIVATE_KEY_PATH')).read()
+app.config['JWT_PUBLIC_KEY'] = open(os.environ.get('PUBLIC_KEY_PATH')).read()
+app.config['JWT_ALGORITHM'] = os.environ.get('ENCRYPT_ALG')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=1) # Define the lifespan of the token
 jwt = JWTManager(app)
 
