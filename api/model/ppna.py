@@ -40,7 +40,7 @@ class Ppna:
             print(f"Error inesperado: {e}")
             raise
 
-    #calculate the area of the polygon 
+    #calculate the area of the polygon in square meters
     def get_area(geometry):     
         polygon_geojson = Ppna.points_to_geoJson(geometry)
         geometry_area = area(polygon_geojson)
@@ -65,3 +65,43 @@ class Ppna:
         }
 
         return polygon_geojson
+    
+    @staticmethod
+    def get_unique_points(geometry):
+        ppna_collection = db["ppna"]
+        ppna_collection.create_index([("location", "2dsphere")], unique=False)
+
+        # Create a GEOJson polygon with the user data
+        polygon_geojson = {
+            "type": "Polygon",
+            "coordinates": [geometry],
+        }
+
+        # Get unique latitude and longitude points inside polygon
+        try:
+            points_in_polygon = list(
+                ppna_collection.find(
+                    {"location": {"$geoWithin": {"$geometry": polygon_geojson}}},
+                    {"_id": 0, "latitude": 1, "longitude": 1}
+                )
+            )
+
+            # Filter out duplicate points
+            unique_points_set = set()
+            unique_points = []
+            for point in points_in_polygon:
+                point_tuple = (point["latitude"], point["longitude"])
+                if point_tuple not in unique_points_set:
+                    unique_points_set.add(point_tuple)
+                    unique_points.append([point["latitude"], point["longitude"]])
+            
+            return unique_points
+
+        except OperationFailure as e:
+            # Handle specific errors from MongoDB
+            print(f"Error de operación: {e}")
+            raise
+
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+            raise

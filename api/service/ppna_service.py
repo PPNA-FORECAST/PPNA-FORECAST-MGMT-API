@@ -15,7 +15,7 @@ class PpnaService:
         if not isinstance(geometry, list):
             raise ValueError("Polygon coordinates must be a list")
         
-        points_in_polygon = Ppna.get_points(geometry)  
+        points_in_polygon = Ppna.get_points(geometry)
 
         if not points_in_polygon:
             raise NotFound("No Points found in the User Geometry.")
@@ -34,3 +34,23 @@ class PpnaService:
         area = Ppna.get_area(geometry)
 
         return area
+    
+    @staticmethod
+    def get_unique_points(geometry):
+        
+        geometry = Ppna.correct_coordinate_order(geometry)
+        geometry = Ppna.close_polygon(geometry)
+        
+        if not geometry:
+            raise BadRequest("No se proporcionó la geometría del usuario")
+
+        if not isinstance(geometry, list):
+            raise ValueError("Polygon coordinates must be a list")
+        
+        unique_points = Ppna.get_unique_points(geometry)
+        unique_points = Ppna.correct_coordinate_order(unique_points)
+        
+        if not unique_points:
+            raise NotFound("No Points found in the User Geometry.")
+        else:
+            return unique_points
