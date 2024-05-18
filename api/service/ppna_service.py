@@ -26,7 +26,7 @@ class PpnaService:
     @staticmethod
     def get_area(geometry):	
 
-        #geometry = Ppna.correct_coordinate_order(geometry) 
+        geometry = Ppna.correct_coordinate_order(geometry) 
         geometry = Ppna.close_polygon(geometry)
 
         if not geometry:
@@ -59,24 +59,22 @@ class PpnaService:
      
     #como todavia no tenemos la api del modelo voy a hacer que este servicio simule el \
     #comportamiento. Basicamente toma un input de puntos con todas las caracteristicas (ppna,
-    #temp, ppt, ...) y devuelve {points:[lat:xx,long:yy,dates:[1,2,3,4], ppna:[1,2,3,4]],..} para cada punto 
+    #temp, ppt, ...) y devuelve {location:[lat:xx,long:yy,sample:[date:a, ppna:1], ..], ..} para cada punto 
     @staticmethod
     def get_forecast(points):
 
-        # Crear un diccionario para almacenar los puntos agrupados por coordenadas
         points_dict = {}
-        
+
         # Procesar cada punto y agruparlo según las coordenadas
         for point in points:
             coords = (point["latitude"], point["longitude"])
             if coords not in points_dict:
-                points_dict[coords] = {"lat": point["latitude"], "long": point["longitude"], "dates": [], "ppna": []}
-            points_dict[coords]["dates"].append(point["date"])
-            points_dict[coords]["ppna"].append(point["ppna"])
+                points_dict[coords] = {"lat": point["latitude"], "long": point["longitude"], "data": []}
+            points_dict[coords]["data"].append({"date": point["date"], "ppna": point["ppna"]})
 
         # Convertir el diccionario en el formato deseado
-        formatted_points = [{"points": [{"lat": coord[0], "long": coord[1], "ppna": points_dict[coord]["ppna"] , "dates": points_dict[coord]["dates"]}] for coord in points_dict}]
-        
+        formatted_points = [{"location": {"lat": coord[0], "long": coord[1], "sample": points_dict[coord]["data"]}} for coord in points_dict]
+
         return formatted_points
 
         

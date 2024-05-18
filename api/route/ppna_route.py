@@ -13,8 +13,8 @@ from api.errors.errors import *
 ppna_bp = Blueprint('ppna', __name__)
 
 # Get a user regitrated and return the ppna history and ppna forecast: 
-# {points:[lat:mm, long:xx,date:yy, ppna:xx], ...} 
-@ppna_bp.route("/api/v1/ppna/points", methods=["GET"])
+#  {location:[lat:xx,long:yy,sample:[date:a, ppna:1], ..], ..} 
+@ppna_bp.route("/api/v1/ppna/point", methods=["GET"])
 @jwt_required()
 def get_ppna_points():
     current_user = get_jwt_identity()
@@ -27,12 +27,12 @@ def get_ppna_points():
     
     points = PpnaService.get_points(geometry)
     
-    return jsonify({"points": points}), 200
+    return jsonify(points), 200
 
 
 #Get a geography and return all the locations inside the geography and the total area of the geography. 
-#{area:xx , locations: [latitude:mm, longitude:xx], ...}  and the total area 
-@ppna_bp.route("/api/v1/ppna/locations", methods=["GET"])
+#{area:xx , location: [latitude:mm, longitude:xx], ...}  and the total area 
+@ppna_bp.route("/api/v1/ppna/location", methods=["GET"])
 def calculate_polygon():
 
     data = request.json
@@ -44,4 +44,4 @@ def calculate_polygon():
     polygon_area = PpnaService.get_area(data)
     locations = PpnaService.get_locations(data)
 
-    return jsonify({"area": polygon_area, "locations": locations }), 200
+    return jsonify({"area": polygon_area, "location": locations }), 200
