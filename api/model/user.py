@@ -3,10 +3,10 @@ from config import db
 
 class User:
 
-    def __init__(self, email, password, datapoints):
+    def __init__(self, email, password, geometry):
         self.email = email
         self.password = password
-        self.datapoints = datapoints
+        self.geometry = geometry
 
     def save(self):
         user_collection = db["user"]

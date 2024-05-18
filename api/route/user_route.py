@@ -46,9 +46,6 @@ def login_user():
 @jwt_required()
 def get_user(): 
     current_user = get_jwt_identity()
-    user = UserService.get_user(current_user)
-    if user:
-        return jsonify({"email":user['email'], "datapoints":user['datapoints']}), 200
-    else:
-        raise NotFound("User not found.")
-
+    mail, geometry = UserService.get_user_attributes(current_user)
+    
+    return jsonify({"email":mail, "geometry":geometry}), 200

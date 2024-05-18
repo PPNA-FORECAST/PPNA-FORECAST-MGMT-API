@@ -12,6 +12,8 @@ from api.errors.errors import *
 
 ppna_bp = Blueprint('ppna', __name__)
 
+# Get a user regitrated and return the ppna history and ppna forecast: 
+# {points:[lat:mm, long:xx,date:yy, ppna:xx], ...} 
 @ppna_bp.route("/api/v1/ppna/points", methods=["GET"])
 @jwt_required()
 def get_ppna_points():
@@ -21,17 +23,18 @@ def get_ppna_points():
     if not user:
         raise NotFound("User not found.")
     
-    geometry = user.get("datapoints")  # User polygon
+    geometry = user.get("geometry")  # User polygon
     
     points = PpnaService.get_points(geometry)
-    area = PpnaService.get_area(geometry)
     
-    return jsonify({"locations": points, "area":area}), 200
+    return jsonify({"points": points}), 200
 
 
-@ppna_bp.route("/api/v1/ppna/calculate-polygon", methods=["POST"])
+#Get a geography and return all the locations inside the geography and the total area of the geography. 
+#{area:xx , locations: [latitude:mm, longitude:xx], ...}  and the total area 
+@ppna_bp.route("/api/v1/ppna/locations", methods=["GET"])
 def calculate_polygon():
-    # Data is a list of datapoints, similar to the one stored in the user profile
+
     data = request.json
 
     if not data or not isinstance(data, list):
@@ -39,6 +42,6 @@ def calculate_polygon():
 
     
     polygon_area = PpnaService.get_area(data)
-    unique_points = PpnaService.get_unique_points(data)
+    locations = PpnaService.get_locations(data)
 
-    return jsonify({"polygon_points": unique_points, "area": polygon_area}), 200
+    return jsonify({"area": polygon_area, "locations": locations }), 200

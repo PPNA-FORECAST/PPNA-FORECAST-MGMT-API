@@ -11,13 +11,13 @@ user_register_schema = {
             "minLength": 8, # Password must be at least 8 characters
             "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$"  # Password must have Upper case, Lower case and numbers
         },
-        "datapoints": {
+        "geometry": {
             "type": "array",
             "items": {"type": "array", "items": {"type": "number"}},
             "minItems": 3
         }
     },
-    "required": ["email", "password", "datapoints"]
+    "required": ["email", "password", "geometry"]
 }
 
 user_login_schema = {

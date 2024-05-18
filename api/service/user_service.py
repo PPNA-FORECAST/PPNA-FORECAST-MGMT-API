@@ -8,9 +8,9 @@ from api.model.user import User
 
 class UserService:
 	@staticmethod
-	def create_user(email, password, datapoints):
+	def create_user(email, password, geometry):
 		encrypted_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
-		new_user = User(email, encrypted_password, datapoints)
+		new_user = User(email, encrypted_password, geometry)
 		new_user.save()
 		return new_user
 
@@ -31,9 +31,22 @@ class UserService:
 	def get_user(email):
 		
 		user_from_db = User.find_by_email(email)
-
 		if user_from_db:
 			return user_from_db
 		else:
 			raise NotFound('Profile not found')
+
+	@staticmethod
+	def get_user_attributes(email):
+		
+		user = UserService.get_user(email)
+
+		mail = user['email']
+
+		geometry = []
+		for point in user['geometry']:
+			point = {"latitude": point[0], "longitude": point[1]}
+			geometry.append(point)
+
+		return mail, geometry
 

@@ -67,7 +67,8 @@ class Ppna:
         return polygon_geojson
     
     @staticmethod
-    def get_unique_points(geometry):
+    def get_locations(geometry):
+        
         ppna_collection = db["ppna"]
         ppna_collection.create_index([("location", "2dsphere")], unique=False)
 
@@ -93,8 +94,8 @@ class Ppna:
                 point_tuple = (point["latitude"], point["longitude"])
                 if point_tuple not in unique_points_set:
                     unique_points_set.add(point_tuple)
-                    unique_points.append([point["latitude"], point["longitude"]])
-            
+                    unique_points.append({"latitude": point["latitude"], "longitude": point["longitude"]})
+    
             return unique_points
 
         except OperationFailure as e:
