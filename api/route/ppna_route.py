@@ -35,7 +35,6 @@ def calculate_polygon():
     data = request.json
 
     if not data or not isinstance(data, list):
-        print("entra")
         return jsonify({"error": "Invalid input data. A list of coordinates is expected."}), 400
 
     
