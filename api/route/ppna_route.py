@@ -32,7 +32,7 @@ def get_ppna_points():
 
 #Get a geography and return all the locations inside the geography and the total area of the geography. 
 #{area:xx , location: [latitude:mm, longitude:xx], ...}  and the total area 
-@ppna_bp.route("/api/v1/ppna/location", methods=["GET"])
+@ppna_bp.route("/api/v1/ppna/location", methods=["POST"])
 def calculate_polygon():
 
     data = request.json

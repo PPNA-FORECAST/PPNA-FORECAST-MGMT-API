@@ -38,15 +38,16 @@ class UserService:
 
 	@staticmethod
 	def get_user_attributes(email):
-		
+
 		user = UserService.get_user(email)
 
 		mail = user['email']
 
 		geometry = []
 		for point in user['geometry']:
-			point = {"latitude": point[0], "longitude": point[1]}
-			geometry.append(point)
+			if point and len(point) == 2: # Validate if the point is not empty
+				processed_point = {"latitude": point[0], "longitude": point[1]}
+				geometry.append(processed_point)
 
 		return mail, geometry
 

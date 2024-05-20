@@ -26,7 +26,7 @@ class Ppna:
                 )
             )
             
-            #view how to sort the points to be util for the model
+            #Check how to sort the points to be util for the model
             #points_in_polygon_sorted = sorted(points_in_polygon, key=lambda x: datetime.strptime(x.get('date'), '%Y-%m-%d'))
 
             return points_in_polygon
