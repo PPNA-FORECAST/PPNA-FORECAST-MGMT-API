@@ -17,7 +17,7 @@ services:
     networks:
       - vnet1
 
-  api:
+  mgmt-api:
     build: . 
     command: python -u app.py 
     ports: 
