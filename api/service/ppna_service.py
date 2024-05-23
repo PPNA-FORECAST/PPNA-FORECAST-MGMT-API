@@ -16,12 +16,14 @@ class PpnaService:
             raise ValueError("Polygon coordinates must be a list")
         
         points_in_polygon = Ppna.get_points(geometry)
-        forecast = PpnaService.get_forecast(points_in_polygon)
 
-        if not forecast:
+        points_in_polygon = PpnaService.group_by_location(points_in_polygon)
+
+        print(points_in_polygon)
+        if not points_in_polygon:
             raise NotFound("No Points found in the User Geometry.")
         else:
-            return forecast
+            return points_in_polygon
         
     @staticmethod
     def get_area(geometry):	
@@ -57,24 +59,20 @@ class PpnaService:
         
 
      
-    #como todavia no tenemos la api del modelo voy a hacer que este servicio simule el \
-    #comportamiento. Basicamente toma un input de puntos con todas las caracteristicas (ppna,
-    #temp, ppt, ...) y devuelve {location:[lat:xx,long:yy,sample:[date:a, ppna:1], ..], ..} para cada punto 
+    #Toma un input de puntos con todas las caracteristicas (ppna, temp, ppt, ...) y
+    # devuelve {location:[lat:xx,long:yy,sample:[date:a, ppna:1], ..], ..} para cada punto. 
     @staticmethod
-    def get_forecast(points):
-
+    def group_by_location(points):
         points_dict = {}
 
         # Procesar cada punto y agruparlo según las coordenadas
         for point in points:
             coords = (point["latitude"], point["longitude"])
             if coords not in points_dict:
-                points_dict[coords] = {"lat": point["latitude"], "long": point["longitude"], "data": []}
-            points_dict[coords]["data"].append({"date": point["date"], "ppna": point["ppna"]})
+                points_dict[coords] = {"latitude": point["latitude"], "longitude": point["longitude"], "data": []}
+            points_dict[coords]["data"].append({"date": point["date"], "temp":point["temp"], "ppt":point["ppt"], "ppna": point["ppna"]})
 
         # Convertir el diccionario en el formato deseado
-        formatted_points = [{"location": {"lat": coord[0], "long": coord[1], "sample": points_dict[coord]["data"]}} for coord in points_dict]
-
-        return formatted_points
-
+        formatted_points = [{"location": {"latitude": coord[0], "longitude": coord[1], "sample": points_dict[coord]["data"]}} for coord in points_dict]
         
+        return formatted_points
