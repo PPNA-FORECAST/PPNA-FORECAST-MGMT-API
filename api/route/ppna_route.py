@@ -17,6 +17,8 @@ ppna_bp = Blueprint('ppna', __name__)
 @ppna_bp.route("/api/v1/ppna/point", methods=["GET"])
 @jwt_required()
 def get_ppna_points():
+
+    token = request.headers.get('Authorization').split(' ')[1]
     current_user = get_jwt_identity()
     user = UserService.get_user(current_user)
     
@@ -26,8 +28,9 @@ def get_ppna_points():
     geometry = user.get("geometry")  # User polygon
     
     points = PpnaService.get_points(geometry)
-    
-    return jsonify(points), 200
+    forecast = PpnaService.get_forecast(points,token)
+    print(forecast)
+    return jsonify(forecast), 200
 
 
 #Get a geography and return all the locations inside the geography and the total area of the geography. 

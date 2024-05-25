@@ -1,5 +1,9 @@
 from api.model.ppna import Ppna
 from werkzeug.exceptions import NotFound, BadRequest, Unauthorized
+import requests
+import json
+import os
+
 
 class PpnaService:
     
@@ -17,9 +21,8 @@ class PpnaService:
         
         points_in_polygon = Ppna.get_points(geometry)
 
-        points_in_polygon = PpnaService.group_by_location(points_in_polygon)
-
-        print(points_in_polygon)
+        points_in_polygon = Ppna.group_by_location(points_in_polygon)
+        
         if not points_in_polygon:
             raise NotFound("No Points found in the User Geometry.")
         else:
@@ -57,22 +60,21 @@ class PpnaService:
         else:
             return locations
         
-
-     
-    #Toma un input de puntos con todas las caracteristicas (ppna, temp, ppt, ...) y
-    # devuelve {location:[lat:xx,long:yy,sample:[date:a, ppna:1], ..], ..} para cada punto. 
     @staticmethod
-    def group_by_location(points):
-        points_dict = {}
-
-        # Procesar cada punto y agruparlo según las coordenadas
-        for point in points:
-            coords = (point["latitude"], point["longitude"])
-            if coords not in points_dict:
-                points_dict[coords] = {"latitude": point["latitude"], "longitude": point["longitude"], "data": []}
-            points_dict[coords]["data"].append({"date": point["date"], "temp":point["temp"], "ppt":point["ppt"], "ppna": point["ppna"]})
-
-        # Convertir el diccionario en el formato deseado
-        formatted_points = [{"location": {"latitude": coord[0], "longitude": coord[1], "sample": points_dict[coord]["data"]}} for coord in points_dict]
+    def get_forecast(points, token):
         
-        return formatted_points
+        url = os.environ.get('ML_API_URI')
+  
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}"
+        }
+        print(json.dumps(points))
+        response = requests.post(url, headers=headers, data=json.dumps(points))
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise BadRequest("Error en la solicitud: {response.text}")
+
+

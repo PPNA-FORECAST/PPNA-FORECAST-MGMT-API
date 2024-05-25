@@ -106,3 +106,21 @@ class Ppna:
         except Exception as e:
             print(f"Error inesperado: {e}")
             raise
+
+    #Toma un input de puntos con todas las caracteristicas (ppna, temp, ppt, ...) y
+    # devuelve {location:[lat:xx,long:yy,sample:[date:a, ppna:1], ..], ..} para cada punto. 
+    @staticmethod
+    def group_by_location(points):
+        points_dict = {}
+
+        # Procesar cada punto y agruparlo según las coordenadas
+        for point in points:
+            coords = (point["latitude"], point["longitude"])
+            if coords not in points_dict:
+                points_dict[coords] = {"latitude": point["latitude"], "longitude": point["longitude"], "data": []}
+            points_dict[coords]["data"].append({"date": point["date"], "temp":point["temp"], "ppt":point["ppt"], "ppna": point["ppna"]})
+
+        # Convertir el diccionario en el formato deseado
+        formatted_points = [{"location": {"latitude": coord[0], "longitude": coord[1], "sample": points_dict[coord]["data"]}} for coord in points_dict]
+        
+        return formatted_points
