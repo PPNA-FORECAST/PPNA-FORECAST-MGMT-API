@@ -75,6 +75,6 @@ class PpnaService:
         if response.status_code == 200:
             return response.json()
         else:
-            raise BadRequest("Error en la solicitud: {response.text}")
+            raise BadRequest(f"Error en la solicitud: {response.text}")
 
 

@@ -29,7 +29,7 @@ def get_ppna_points():
     
     points = PpnaService.get_points(geometry)
     forecast = PpnaService.get_forecast(points,token)
-    print(forecast)
+
     return jsonify(forecast), 200
 
 
@@ -48,3 +48,18 @@ def calculate_polygon():
     locations = PpnaService.get_locations(data)
 
     return jsonify({"area": polygon_area, "location": locations }), 200
+
+#Get a geography and return all the locations inside the geography and the total area of the geography. 
+#{area:xx , location: [latitude:mm, longitude:xx], ...}  and the total area 
+@ppna_bp.route("/api/v1/ppna/area", methods=["POST"])
+def get_area():
+
+    data = request.json
+
+    if not data or not isinstance(data, list):
+        return jsonify({"error": "Invalid input data. A list of coordinates is expected."}), 400
+
+    
+    polygon_area = PpnaService.get_area(data)
+
+    return jsonify({"area": polygon_area}), 200
