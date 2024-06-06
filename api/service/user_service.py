@@ -8,9 +8,9 @@ from api.model.user import User
 
 class UserService:
 	@staticmethod
-	def create_user(email, password, geometry):
+	def create_user(username, email, password, geometry):
 		encrypted_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
-		new_user = User(email, encrypted_password, geometry)
+		new_user = User(username, email, encrypted_password, geometry)
 		new_user.save()
 		return new_user
 

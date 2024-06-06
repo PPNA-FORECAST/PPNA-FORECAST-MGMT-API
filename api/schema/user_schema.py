@@ -1,6 +1,10 @@
 user_register_schema = {
     "type": "object",
     "properties": {
+        "username": {
+            "type": "string",
+            "minLength": 3
+        },
         "email": {
             "type": "string",
             "format": "email", 
@@ -17,7 +21,7 @@ user_register_schema = {
             "minItems": 3
         }
     },
-    "required": ["email", "password", "geometry"]
+    "required": ["username","email", "password", "geometry"]
 }
 
 user_login_schema = {
