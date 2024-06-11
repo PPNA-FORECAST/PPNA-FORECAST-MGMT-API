@@ -49,3 +49,21 @@ def get_user():
     username, mail, geometry = UserService.get_user_attributes(current_user)
     
     return jsonify({"username": username, "email": mail, "geometry": geometry}), 200
+
+@user_bp.route("/api/v1/user/check-email", methods=["POST"])
+def check_email():
+    email_data = request.get_json()
+
+    if 'email' not in email_data:
+        return handle_bad_request_error("Email is required")
+
+    email = email_data['email']
+
+    try:
+        user = UserService.get_user(email)
+        if user:
+            return handle_conflict_error("User already exists.")
+    except NotFound:
+        return jsonify({"msg": "Email is available"}), 200
+    except Exception as e:
+        return handle_generic_error(e)
